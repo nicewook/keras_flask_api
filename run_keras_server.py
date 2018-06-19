@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for
 from keras.applications import ResNet50
 from keras_preprocessing.image import img_to_array
 from keras_applications import imagenet_utils
@@ -11,7 +11,7 @@ import tensorflow as tf
 #template_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 #print("template_dir: ", template_dir)
 app = Flask(__name__)  #, template_folder=template_dir)
-UPLOAD_FOLDER = os.path.basename('uploads')
+UPLOAD_FOLDER = os.path.basename('static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
@@ -52,7 +52,13 @@ def upload_file():
 
     file.save(f)
 
-    return render_template('index.html')
+
+    # return render_template('index.html')
+    f = os.path.join("\\", f)
+    print("uploaded_image", f)
+    show_image = url_for('static', filename = file.filename)
+    return render_template('result.html', uploaded_image=show_image)
+    
 
 @app.route("/predict", methods=["POST"])
 def predict():
