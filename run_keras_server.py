@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, jsonify
 from keras.applications import ResNet50
 from keras_preprocessing.image import img_to_array
 from keras_applications import imagenet_utils
@@ -49,13 +49,8 @@ def hello_world():
 def upload_file():
     file = request.files['image']
     f = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-
     file.save(f)
 
-
-    # return render_template('index.html')
-    f = os.path.join("\\", f)
-    print("uploaded_image", f)
     show_image = url_for('static', filename = file.filename)
     return render_template('result.html', uploaded_image=show_image)
     
@@ -64,9 +59,12 @@ def upload_file():
 def predict():
     data = {"success": False};
 
-    if flask.request.method == "POST":
-        if flask.request.files.get("image"):
-            image = flask.request.files["image"].read()
+    if request.method == "POST":
+        if request.files.get("image"):
+            file = request.files['image']
+
+            # image = request.files["image"].read()
+            image = file.read()
             image = Image.open(io.BytesIO(image))
 
             image = prepare_image(image, target=(224,224))
@@ -83,7 +81,12 @@ def predict():
 
                 data["success"] = True
     
-    return flask.jsonify(data)
+        f = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(f)
+    return jsonify(data)
+    # show_image = url_for('static', filename = file.filename)
+    # return render_template('result.html', uploaded_image=show_image)
+
 
 if __name__ == "__main__":
     print(("* Loading Keras model and Flask staring server..."
